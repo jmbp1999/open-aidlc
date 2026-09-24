@@ -1,0 +1,46 @@
+# Academic Documents & Submissions (Preserved locally, not tracked for open-source project)
+.msc-academic/
+*.pdf
+
+# Environment & Credentials
+.env
+.env.*
+*.local
+*.pem
+*.key
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Directories
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+
+# Python & Node Build Artifacts
+node_modules/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

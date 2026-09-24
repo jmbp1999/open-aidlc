@@ -1,0 +1,77 @@
+# OpenAIDLC Configuration Template: Enterprise Strict
+# Designed for regulated industries, SOC2 compliance, and zero unverified execution
+
+version: "1.0"
+project_name: "enterprise-platform"
+description: "Strict governance agentic lifecycle with approval gates and audit trails"
+
+governance:
+  mode: "strict"
+  max_cost_usd_per_task: 2.00
+  require_human_approval_before_push: true
+  require_human_approval_before_design: true
+  enforce_isolated_worktrees: true
+  zero_retention_models_only: true
+  audit_logging:
+    enabled: true
+    destination: "s3://enterprise-audit-logs/aidlc/"
+    include_prompts: false               # PII / IP protection
+
+models:
+  tier0_local:
+    provider: "vllm"
+    model_name: "codellama-34b-instruct"
+    base_url: "http://internal-vllm.corp:8000/v1"
+    cost_per_million_tokens: 0.00
+  tier1_fast:
+    provider: "azure_openai"
+    model_name: "gpt-4o-mini"
+    cost_per_million_tokens: 0.15
+  tier2_frontier:
+    provider: "azure_openai"
+    model_name: "gpt-4o"
+    cost_per_million_tokens: 5.00
+
+mcp_servers:
+  jira:
+    command: "npx"
+    args: ["-y", "@atlassian/jira-mcp"]
+    env:
+      JIRA_HOST: "corp.atlassian.net"
+      JIRA_API_TOKEN: "${JIRA_TOKEN}"
+  confluence:
+    command: "npx"
+    args: ["-y", "@atlassian/confluence-mcp"]
+  gitlab:
+    command: "npx"
+    args: ["-y", "@gitlab/mcp-server"]
+  sentry:
+    command: "npx"
+    args: ["-y", "@sentry/mcp-server"]
+  playwright:
+    command: "npx"
+    args: ["-y", "@playwright/mcp-server"]
+
+workflows:
+  security_patch:
+    trigger: "sentry:alert.p1"
+    steps:
+      - name: "triage"
+        tier: "tier1_fast"
+        action: "parse_stack_trace_and_correlate_sentry"
+      - name: "spec_lookup"
+        tier: "tier1_fast"
+        action: "query_confluence_architecture_docs"
+      - name: "impact_analysis"
+        tier: "tier2_frontier"
+        action: "compute_code_review_graph_blast_radius"
+        pause_for_human_review: true
+      - name: "remediate"
+        tier: "tier2_frontier"
+        action: "patch_vulnerability_in_worktree"
+      - name: "qa_verification"
+        tier: "tier1_fast"
+        action: "run_playwright_e2e_and_security_scan"
+      - name: "jira_transition"
+        tier: "tier1_fast"
+        action: "create_merge_request_and_transition_jira"

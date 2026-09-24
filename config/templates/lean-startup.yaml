@@ -1,0 +1,82 @@
+# OpenAIDLC Configuration Template: Lean Startup
+# Optimized for minimum token cost (<$0.50/task) and high-velocity shipping
+
+version: "1.0"
+project_name: "startup-core"
+description: "High-velocity, budget-capped agentic lifecycle for startups"
+
+# Global Governance Policy
+governance:
+  mode: "balanced"                       # permissive | balanced | strict
+  max_cost_usd_per_task: 0.50            # Hard spending cap per issue
+  require_human_approval_before_push: true
+  enforce_isolated_worktrees: true       # Never commit directly to main
+  telemetry:
+    tracing: true
+    export_format: "json"
+
+# Pluggable Model Tiering Strategy (BYOM)
+models:
+  tier0_local:
+    provider: "ollama"
+    model_name: "deepseek-coder:6.7b"
+    base_url: "http://localhost:11434"
+    tasks: ["ast_slicing", "lint_fixes", "docstrings", "diff_formatting"]
+    cost_per_million_tokens: 0.00
+  tier1_fast:
+    provider: "google"
+    model_name: "gemini-1.5-flash"
+    tasks: ["issue_triage", "build_log_compaction", "change_summarization"]
+    cost_per_million_tokens: 0.075
+  tier2_frontier:
+    provider: "anthropic"
+    model_name: "claude-3-5-sonnet"
+    tasks: ["architecture_design", "multi_file_patch_synthesis", "security_audit"]
+    cost_per_million_tokens: 3.00
+
+# Universal Tool Bus (Model Context Protocol - MCP)
+mcp_servers:
+  linear:
+    command: "npx"
+    args: ["-y", "@linear/mcp-server"]
+    env:
+      LINEAR_API_KEY: "${LINEAR_API_KEY}"
+  github:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_TOKEN}"
+  docker:
+    command: "docker-mcp"
+    args: ["--socket", "/var/run/docker.sock"]
+  slack:
+    command: "npx"
+    args: ["-y", "@slack/mcp-server"]
+    env:
+      SLACK_BOT_TOKEN: "${SLACK_BOT_TOKEN}"
+
+# Composable Lifecycle Workflows
+workflows:
+  dev_fix:
+    trigger: "linear:issue.assigned"
+    steps:
+      - name: "triage"
+        tier: "tier1_fast"
+        action: "parse_issue_and_extract_repro"
+      - name: "explore"
+        tier: "tier0_local"
+        action: "ast_search_and_caller_callee_graph"
+      - name: "design"
+        tier: "tier2_frontier"
+        action: "synthesize_solution_plan"
+        pause_for_human_review: true
+      - name: "implement"
+        tier: "tier0_local"
+        action: "code_edit_in_isolated_worktree"
+        fallback_tier: "tier2_frontier"
+      - name: "verify"
+        tier: "tier0_local"
+        action: "run_test_suite_and_lint"
+      - name: "publish"
+        tier: "tier1_fast"
+        action: "create_pull_request_and_notify_slack"

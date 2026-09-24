@@ -1,0 +1,196 @@
+# aidlc.config.yaml - Radical Customizability & Enterprise Production Specification
+# Designed for 100% pluggability across startups (Linear/Notion/Vercel) and enterprises (Jira/Confluence/K8s)
+version: "1.0"
+
+project:
+  name: "omnichannel-engineering-platform"
+  organization: "core-engineering"
+  primary_languages: ["typescript", "go", "python", "flutter"]
+  topologies:
+    frontend: "datasource/frontend"       # Next.js 14, React 18, Apollo Client
+    backend: "datasource/order-engine"    # Go Clean Architecture, gRPC, PostgreSQL
+    mobile: "datasource/mobile-app"       # Flutter, Bloc, Appium UI tests
+
+# ==============================================================================
+# 1. AUTONOMOUS AI INITIALIZATION & CUSTOMIZATION (aidlc init --ai / --customize)
+# ==============================================================================
+init:
+  auto_discovered_at: "2026-09-22T08:00:00Z"
+  customization_profile: "balanced_startup_to_enterprise"
+  fingerprint:
+    detected_frameworks: ["nextjs", "go-clean-arch", "flutter", "fastapi"]
+    detected_test_runners: ["jest", "go test", "flutter test", "pytest"]
+    detected_ci: ["github-actions", "azure-pipelines"]
+    detected_trackers: ["linear", "jira"]
+
+# ==============================================================================
+# 2. PLUGGABLE MODEL TIERING (BRING YOUR OWN MODEL - BYOM)
+# Supports: Ollama, vLLM, Anthropic, Google Gemini, OpenAI, Bedrock, Groq, OpenRouter
+# ==============================================================================
+model_routing:
+  # Tier 0: Free Local SLMs & Parsers (Zero API Token Cost)
+  tier_0_local:
+    enabled: true
+    backend: "ollama"                     # Options: "ollama", "vllm", "localai", "llama.cpp"
+    endpoint: "http://localhost:11434"
+    model: "deepseek-coder:6.7b"
+    tasks: ["ast_slicing", "syntax_linting", "log_filtering", "docstring_validation"]
+
+  # Tier 1: Sub-Cent High-Throughput Fast Tier (<$0.50 / Million Tokens)
+  tier_1_fast:
+    provider: "google"                    # Primary: Google Gemini 1.5 Flash
+    model: "gemini-1.5-flash"
+    fallback:
+      provider: "anthropic"               # Fallback: Claude 3.5 Haiku
+      model: "claude-3-5-haiku-latest"
+    tasks: ["ticket_triage", "test_log_compaction", "review_drafting", "csat_monitoring"]
+
+  # Tier 2: Frontier Reasoning Tier (Selective Invocation Only)
+  tier_2_frontier:
+    provider: "anthropic"                 # Options: Anthropic Sonnet, OpenAI GPT-4o, Bedrock
+    model: "claude-3-5-sonnet-latest"
+    tasks: ["architecture_synthesis", "multi_file_patching", "root_cause_analysis"]
+
+# ==============================================================================
+# 3. COST & CONTEXT GOVERNANCE (LEAST-COST GUARANTEE)
+# ==============================================================================
+cost_governance:
+  max_cost_per_task_usd: 0.50             # Hard spending limit per issue ticket ($0.50)
+  alert_threshold_usd: 0.35               # Emits warning when 70% of budget reached
+  max_tokens_per_task: 80000              # Context window ceiling
+  prompt_prefix_kv_caching: true          # Reuses cached static system prompts and AST headers
+  local_ast_compression: true             # Compresses 4,000-line build logs into 10-line summaries
+  cache_storage_backend: "sqlite"         # Options: "sqlite", "duckdb", "redis"
+
+# ==============================================================================
+# 4. UNIVERSAL TOOL BUS (MODEL CONTEXT PROTOCOL - MCP)
+# Turnkey, zero-glue-code integration across heterogeneous developer toolchains
+# ==============================================================================
+tools:
+  mcp_servers:
+    # Issue Trackers (Configurable: Linear, Jira, GitHub Issues, GitLab)
+    linear:
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-linear"]
+      env:
+        LINEAR_API_KEY: "${LINEAR_API_KEY}"
+    atlassian_jira:
+      command: "uvx"
+      args: ["mcp-atlassian==0.21.1"]
+      env:
+        JIRA_URL: "${JIRA_URL}"
+        JIRA_USERNAME: "${JIRA_USERNAME}"
+        JIRA_API_TOKEN: "${ATLASSIAN_API_TOKEN}"
+
+    # Documentation & Knowledge Bases (Notion, Confluence, Local Markdown)
+    notion:
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-notion"]
+      env:
+        NOTION_API_KEY: "${NOTION_API_KEY}"
+    confluence:
+      command: "uvx"
+      args: ["mcp-atlassian==0.21.1"]
+      env:
+        CONFLUENCE_URL: "${CONFLUENCE_URL}"
+        CONFLUENCE_API_TOKEN: "${ATLASSIAN_API_TOKEN}"
+
+    # Testing & Mobile Automation (Playwright, Zephyr Scale, Appium)
+    zephyr_scale:
+      command: "npx"
+      args: ["-y", "@smartbear/mcp@0.24.0"]
+      env:
+        ZEPHYR_API_TOKEN: "${ZEPHYR_API_TOKEN}"
+    appium_mobile:
+      command: "npx"
+      args: ["-y", "@appium/mcp-server"]
+
+    # Source Control & CI/CD
+    github:
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-github"]
+      env:
+        GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_TOKEN}"
+
+    # Code Intelligence Graph (Pre-computed AST caller/callee graphs)
+    code_review_graph:
+      command: "uv"
+      args: ["tool", "run", "code-review-graph"]
+
+# ==============================================================================
+# 5. COMPOSABLE WORKFLOW-AS-CODE (CUSTOMIZABLE DAG ENGINE)
+# ==============================================================================
+workflows:
+  # L1: IT Support & Incident Triage
+  L1_support:
+    enabled: true
+    classifier: { auto_assign: true }
+    duplicate_detector: { similarity_threshold: 0.88 }
+    sla_monitor: { alert_channel: "slack://#it-ops-alerts" }
+
+  # L2: Developer Fixes & Feature Implementation
+  L2_dev_fix:
+    enabled: true
+    workspace_isolation: "git_worktree"   # Never modify main/develop directly
+    approval_gates:
+      step_1_analysis: "optional_pause"
+      step_3_solution_design: "mandatory_hard_gate"  # AI cannot code without human sign-off
+      step_5_diff_review: "mandatory_hard_gate"      # Human inspects uncommitted git diff
+    verification:
+      enforce_tdd: true
+      require_evidence_capture: true                 # Capture runtime screenshots/logs
+      evidence_output_dir: "_verify-output"
+
+  # L3: Product, Epics & Knowledge Sync
+  L3_architecture:
+    enabled: true
+    epic_breakdown: { tracker: "linear" }
+    knowledge_base_rag:
+      min_citation_score: 80                         # Drop unverified documentation
+      enforce_provenance: true
+
+  # Custom User Workflow: Automated Dependency Security Migration
+  custom_security_patch:
+    description: "Scan for CVEs, bump version in isolated worktree, run tests, and create PR"
+    steps:
+      - step: "audit_cve"
+        tool: "mcp__github__security_advisories"
+        tier: "tier_1_fast"
+      - step: "create_worktree"
+        action: "git.worktree_add"
+      - step: "apply_patch"
+        tier: "tier_2_frontier"
+      - step: "run_test_suite"
+        command: "yarn test && go test ./..."
+        tier: "tier_0_local"
+      - step: "human_approval"
+        type: "approval_gate"
+        condition: "always"
+      - step: "create_pr"
+        tool: "mcp__github__create_pull_request"
+
+# ==============================================================================
+# 6. GRANULAR POLICY-AS-CODE GOVERNANCE & SANDBOXING
+# ==============================================================================
+governance:
+  mode: "balanced"                        # Options: "full_auto", "balanced", "strict"
+  datasource_policy: "read_only"          # Source repos are strictly read-only
+  worktree_isolation: true
+  banned_bash_patterns:
+    - "rm -rf *"
+    - "git push --force*"
+    - "export * &&"
+    - "eval *"
+
+# ==============================================================================
+# 7. MULTI-RUNTIME HARNESS COMPATIBILITY
+# ==============================================================================
+runtime_harness:
+  antigravity_cli:
+    entrypoint: "agy.sh"
+    config: "AGENTS.md"
+  claude_code:
+    entrypoint: "claude.sh"
+    config: "CLAUDE.md"
+  cursor_ide:
+    config: ".cursorrules"

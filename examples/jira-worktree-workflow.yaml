@@ -1,0 +1,58 @@
+# Example: Jira Sprint Bug Fix with Code Review Graph (CRG) & Git Worktree Isolation
+# Demonstrates strict governance, blast-radius validation, and Jira transition.
+
+version: "1.0"
+workflow_name: "jira-safe-worktree-patch"
+
+trigger:
+  event: "jira:issue.updated"
+  filter:
+    status: "To Do"
+    assignee: "aidlc-bot"
+
+steps:
+  - id: "fetch_ticket"
+    name: "Ingest Jira Ticket Details"
+    model_tier: "tier1_fast"
+    action: "jira.get_issue"
+
+  - id: "fetch_specs"
+    name: "Cross-Reference Confluence PRD"
+    model_tier: "tier1_fast"
+    action: "confluence.search_pages"
+    params:
+      query: "${fetch_ticket.output.component}"
+
+  - id: "crg_blast_radius"
+    name: "Pre-Commit Code Review Graph Analysis"
+    model_tier: "tier0_local"
+    action: "crg.analyze_blast_radius"
+    params:
+      target_module: "${fetch_ticket.output.affected_service}"
+
+  - id: "design_patch"
+    name: "Synthesize Patch Plan"
+    model_tier: "tier2_frontier"
+    action: "synthesize_solution"
+    pause_for_human_approval: true
+
+  - id: "isolated_execution"
+    name: "Execute Code Modifications in Worktree"
+    model_tier: "tier0_local"
+    fallback_tier: "tier2_frontier"
+    action: "git.worktree_apply"
+    params:
+      branch: "hotfix/${fetch_ticket.output.key}"
+
+  - id: "qa_verification"
+    name: "Run Playwright E2E Regression Tests"
+    model_tier: "tier0_local"
+    action: "playwright.run_tests"
+
+  - id: "transition_jira"
+    name: "Update Jira Status to In Review"
+    model_tier: "tier1_fast"
+    action: "jira.transition_issue"
+    params:
+      target_status: "In Review"
+      comment: "Automated fix and test suite verification completed in isolated worktree."
