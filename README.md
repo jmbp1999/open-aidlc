@@ -126,6 +126,7 @@ open-aidlc/
 │   ├── TIERED_ROUTING.md                # Mathematical model routing & cost optimization
 │   ├── MCP_SPECIFICATION.md             # Model Context Protocol integration standards
 │   ├── ROADMAP.md                       # Open-source release milestones (Alpha -> GA)
+│   ├── VALUE_PROPOSITION_AND_BENEFICIARIES.md # ROI, in-house build vs. buy, persona benefits
 │   └── benchmarks/
 │       └── COMPETITIVE_ANALYSIS.md      # Industry benchmark (OpenHands, SWE-agent, Aider)
 │
